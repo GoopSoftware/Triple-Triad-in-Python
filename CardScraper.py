@@ -1,6 +1,7 @@
 import requests as rq
 from bs4 import BeautifulSoup
 import os
+from urllib.parse import urljoin
 
 
 # Function to download the image from the scraped url
@@ -18,32 +19,42 @@ def download_image(url, directory):
         print(f"Failed to download: {filename}")
 
 
-url = "https://strategywiki.org/wiki/Final_Fantasy_VIII/Character_Cards"
+urls = [
+    "https://strategywiki.org/wiki/Final_Fantasy_VIII/Monster_Cards",
+    "https://strategywiki.org/wiki/Final_Fantasy_VIII/Boss_Cards",
+    "https://strategywiki.org/wiki/Final_Fantasy_VIII/GF_Cards",
+    "https://strategywiki.org/wiki/Final_Fantasy_VIII/Character_Cards"
+    ]
 
-response = rq.get(url)
 
-if response.status_code == 200:
 
-    soup = BeautifulSoup(response.text, 'html.parser')
+for url in urls:
 
-    # Find all <img> tags in the html
-    img_tags = soup.find_all('img', src=True)
+    response = rq.get(url)
 
-    # Extracts .png links from the url
-    png_links = []
-    for img in img_tags:
-        src = img['src']
-        if src.endswith('.png'):
-            if src.startswith('//'):
-                src = 'https:' + src
-            png_links.append(src)
+    if response.status_code == 200:
 
-    # Creates a directory
-    os.makedirs("downloaded_images", exist_ok=True)
+        soup = BeautifulSoup(response.text, 'html.parser')
 
-    # Downloads the images
-    for link in png_links:
-        download_image(link, 'downloaded_images')
+        # Find all <img> tags in the html
+        img_tags = soup.find_all('img', src=True)
 
-else:
-    print("failed to fetch the webpage")
+        # Extracts .png links from the url
+        png_links = []
+        for img in img_tags:
+            src = img['src']
+            if src.endswith('.png'):
+                if src.startswith('//'):
+                    src = 'https:' + src
+                png_links.append(src)
+
+        # Creates a directory
+        directory_name = os.path.basename(url)
+        os.makedirs("downloaded_images", exist_ok=True)
+
+        # Downloads the images
+        for link in png_links:
+            download_image(link, 'downloaded_images')
+
+    else:
+        print("failed to fetch the webpage")
