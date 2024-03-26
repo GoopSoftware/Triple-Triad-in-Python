@@ -2,6 +2,8 @@ import cv2
 import pytesseract
 import numpy as np
 
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
 image_path = 'downloaded_images/testocr.png'
 
 image = cv2.imread(image_path)
@@ -18,7 +20,7 @@ for contour in contours:
 
     roi = binary_image[y:y+h, x:x+w]
 
-    number = pytesseract.image_to_string(roi, config='--psm 6 digits')
+    number = pytesseract.image_to_string(roi, config='--psm 6')
 
     print("Extracted Number:", number)
 
