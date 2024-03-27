@@ -1,13 +1,13 @@
 import pytesseract
 import cv2
-import matplotlib.pyplot as plt
 import os
-import numpy as np
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
+# Todo Save the output into a notepad as soon as you decide the format
 
 def split_image(image):
+    # This function will split an image into thirds and return the 3 sections
     height, width = image.shape
     section_height = height // 3
     top_section = image[0:section_height, :]
@@ -16,9 +16,10 @@ def split_image(image):
     return top_section, middle_section, bottom_section
 
 
-# Get image
+# Get image from downloaded_images
 image_path = 'downloaded_images/FFVIII_Caterchipillar_monster_card.png'
 folder_path = 'downloaded_images'
+
 counter = 0
 total_accuracy = 0
 
@@ -29,11 +30,11 @@ for image_name in os.listdir(folder_path):
     original_image = cv2.imread(files)
     cropped_image = original_image[4:52, 5:33]
     gray_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
-    (thresh, blackAndWhiteImage) = cv2.threshold(gray_image, 240, 255, cv2.THRESH_BINARY)
+    (thresh, blackAndWhiteImage) = cv2.threshold(gray_image, 220, 255, cv2.THRESH_BINARY)
     inverted_image = 255 - blackAndWhiteImage
 
+    # Splits the cards into 3 sections
     top_section, middle_section, bottom_section = split_image(inverted_image)
-
     sections = [top_section, middle_section, bottom_section]
     extracted_numbers = []
 
@@ -59,8 +60,7 @@ for image_name in os.listdir(folder_path):
     accuracy = len(extracted_numbers)
     total_accuracy += accuracy
 
-
-
+# Print accuracy
 average_accuracy = total_accuracy / 440
 average_accuracy = round(average_accuracy, 2)
 print(f"Accuracy: {average_accuracy * 100}%")
@@ -70,4 +70,5 @@ print(f"Accuracy: {average_accuracy * 100}%")
 #plt.axis('off')
 #plt.show()
 
-
+if __name__ == '__main__':
+    print('Numbers finished extracting')

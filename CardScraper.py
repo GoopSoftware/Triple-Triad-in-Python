@@ -58,3 +58,6 @@ for url in urls:
 
     else:
         print("failed to fetch the webpage")
+
+if __name__ == '__main__':
+    print('Cards have been scraped')
