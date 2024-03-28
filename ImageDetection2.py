@@ -8,15 +8,16 @@ def compare_images(image1, image2):
     img2 = cv2.imread(image2, cv2.IMREAD_GRAYSCALE)
 
     win_size = 5
-
+    # Detect similarity
     similarity = ssim(img1, img2, win_size=win_size, full=True)
     return similarity
 
 
+# Takes the input image and the folder path and iterates between each image to find the matching image
 def find_matching_image(input_image, folder_path):
     max_similarity = 0
     matching_image = None
-
+    # Checks each file in the folder
     for filename in os.listdir(folder_path):
         if filename.endswith('.png'):
             image_path = os.path.join(folder_path, filename)

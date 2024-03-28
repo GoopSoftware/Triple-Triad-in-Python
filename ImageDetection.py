@@ -1,7 +1,7 @@
 import cv2
 import os
 
-
+### Doesnt work ###
 def find_image(image_path, folder_path):
 
     input_image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
