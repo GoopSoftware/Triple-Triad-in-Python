@@ -35,17 +35,20 @@ max_dropdown_items = 5
 
 scroll_pos = 0
 
+dragging_image = None
+drag_offset = (0, 0)
+
 
 def players_hand(x_pos, images, side):
     dropdown_rect = pygame.Rect(x_pos, 0, dropdown_width, screen_height)
     pygame.draw.rect(screen, WHITE, dropdown_rect)
-    #pygame.draw.rect(screen, BLACK, dropdown_rect, 2)
 
     for i, img in enumerate(images[:max_dropdown_items]):
-        img_rect = img.get_rect()
-        img_rect.topleft = (x_pos + 10, i * dropdown_item_height + 10)
-        if screen_height >= img_rect.bottom - scroll_pos >= 0:
-            screen.blit(img, img_rect)
+        img_rect = img.get_rect(topleft=(x_pos + 10, i * dropdown_item_height + 10 - scroll_pos))
+        screen.blit(img, img_rect)
+        if img_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+            return img
+    return None
 
 
 def draw_grid():
@@ -74,12 +77,43 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                dragging_image = players_hand(0, left_dropdown_images, side='left')
+                if dragging_image is not None:
+                    drag_offset = (event.pos[0] - dragging_image.get_rect().left,
+                                   event.pos[1] - dragging_image.get_rect(). top)
 
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1 and dragging_image is not None:
+                grid_start_x = (screen_width - (grid_size[1] * grid_cell_width)) // 2
+                grid_start_y = (screen_height - (grid_size[0] * grid_cell_height)) // 2
+                for i in range(grid_size[0]):
+                    for j in range(grid_size[1]):
+                        cell_rect = pygame.Rect(grid_start_x + j * grid_cell_width,
+                                                grid_start_y + i * grid_cell_height,
+                                                grid_cell_width, grid_cell_height)
+                        if cell_rect.collidepoint(event.pos):
+                            cell_center = cell_rect.center
+                            image_rect = dragging_image.get_rect(center=cell_center)
+                            screen.blit(dragging_image, image_rect)
+                            dragging_image = None
+                            break
+
+        elif event.type == pygame.MOUSEMOTION:
+            if dragging_image is not None:
+                dragging_image_rect = dragging_image.get_rect()
+                dragging_image_rect.topleft = (event.pos[0] - drag_offset[0], event.pos[1] - drag_offset[1])
+
+    #screen.fill(WHITE)
 
     draw_grid()
 
-    players_hand(0, left_dropdown_images, side='left')
-    players_hand(430, right_dropdown_images, side='right')
+    left_card_image = players_hand(0, left_dropdown_images, side='left')
+    right_card_image = players_hand(430, right_dropdown_images, side='right')
+
+    if left_card_image is not None:
+        screen.blit(left_card_image, pygame.mouse.get_pos())
 
     pygame.display.flip()
 
