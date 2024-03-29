@@ -5,7 +5,7 @@ import random
 
 pygame.init()
 
-screen_width, screen_height = 540, 380
+screen_width, screen_height = 540, 480
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Triple Triad")
 
@@ -30,7 +30,7 @@ random.shuffle(left_dropdown_images)
 random.shuffle(right_dropdown_images)
 
 dropdown_width = 100
-dropdown_item_height = 50
+dropdown_item_height = 85
 max_dropdown_items = 5
 
 scroll_pos = 0
@@ -40,11 +40,8 @@ drag_offset = (0, 0)
 
 
 def players_hand(x_pos, images, side):
-    dropdown_rect = pygame.Rect(x_pos, 0, dropdown_width, screen_height)
-    pygame.draw.rect(screen, WHITE, dropdown_rect)
-
     for i, img in enumerate(images[:max_dropdown_items]):
-        img_rect = img.get_rect(topleft=(x_pos + 10, i * dropdown_item_height + 10 - scroll_pos))
+        img_rect = img.get_rect(topleft=(x_pos + 10, i * dropdown_item_height + 20 - scroll_pos))
         screen.blit(img, img_rect)
         if img_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
             return img
@@ -52,7 +49,7 @@ def players_hand(x_pos, images, side):
 
 
 def draw_grid():
-    screen.fill(WHITE)
+    #screen.fill(WHITE)
 
     start_x = (screen_width - (grid_size[1] * grid_cell_width)) // 2
     start_y = (screen_height - (grid_size[0] * grid_cell_height)) // 2
@@ -79,8 +76,14 @@ while running:
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                dragging_image = players_hand(0, left_dropdown_images, side='left')
-                if dragging_image is not None:
+                dragging_image_left = players_hand(0, left_dropdown_images, side='left')
+                dragging_image_right = players_hand(430, right_dropdown_images, side='right')
+                if dragging_image_left is not None:
+                    dragging_image = dragging_image_left
+                    drag_offset = (event.pos[0] - dragging_image.get_rect().left,
+                                   event.pos[1] - dragging_image.get_rect(). top)
+                if dragging_image_right is not None:
+                    dragging_image = dragging_image_right
                     drag_offset = (event.pos[0] - dragging_image.get_rect().left,
                                    event.pos[1] - dragging_image.get_rect(). top)
 
@@ -105,15 +108,19 @@ while running:
                 dragging_image_rect = dragging_image.get_rect()
                 dragging_image_rect.topleft = (event.pos[0] - drag_offset[0], event.pos[1] - drag_offset[1])
 
-    #screen.fill(WHITE)
 
+
+
+    # This line of code hides the cards behind the grid
     draw_grid()
 
     left_card_image = players_hand(0, left_dropdown_images, side='left')
     right_card_image = players_hand(430, right_dropdown_images, side='right')
 
-    if left_card_image is not None:
-        screen.blit(left_card_image, pygame.mouse.get_pos())
+
+    # This line of code is causing img clipping
+    #if left_card_image is not None:
+        #screen.blit(left_card_image, pygame.mouse.get_pos())
 
     pygame.display.flip()
 
