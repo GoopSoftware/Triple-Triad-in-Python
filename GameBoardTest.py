@@ -4,6 +4,9 @@ import os
 import random
 from CardClass import Card
 
+# todo: after playing 10 cards all cards reset. Figure out how to draw the background after playing a card to prevent
+# todo: image clipping
+
 pygame.init()
 
 screen_width, screen_height = 540, 480
@@ -43,21 +46,28 @@ scroll_pos = 0
 dragging_image = None
 drag_offset = (0, 0)
 
+card_at_position = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
 
 def draw_background():
-    screen.fill(WHITE)
+    side_width = (screen_width - 300) // 2
+    print("Side Width:", side_width)
+    if len(left_dropdown_images) > 0:
+        pygame.draw.rect(screen, WHITE, (0, 0, side_width, screen_height))
+    if len(right_dropdown_images) > 0:
+        pygame.draw.rect(screen, WHITE, (screen_width - side_width, 0, side_width, screen_height))
+
 
 def players_hand(x_pos, images, max_items, side):
     for i, img in enumerate(images[:max_items]):
-        img_rect = img.get_rect(topleft=(x_pos + 10, i * dropdown_item_height + 20 - scroll_pos))
-        screen.blit(img, img_rect)
-        if img_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
-            return img
+        if img not in placed_left_cards and img not in placed_right_cards:
+            img_rect = img.get_rect(topleft=(x_pos + 10, i * dropdown_item_height + 20 - scroll_pos))
+            screen.blit(img, img_rect)
+            if img_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                return img
     return None
 
 
 def draw_grid():
-    #screen.fill(WHITE)
 
     start_x = (screen_width - (grid_size[1] * grid_cell_width)) // 2
     start_y = (screen_height - (grid_size[0] * grid_cell_height)) // 2
@@ -65,6 +75,7 @@ def draw_grid():
     for i in range(1, grid_size[0]):
         pygame.draw.line(screen, BLACK, (start_x, start_y + i * grid_cell_height),
                          (start_x + grid_size[1] * grid_cell_width, start_y + i * grid_cell_height))
+
     for j in range(1, grid_size[1]):
         pygame.draw.line(screen, BLACK, (start_x + j * grid_cell_width, start_y),
                          (start_x + j * grid_cell_width, start_y + grid_size[0] * grid_cell_height))
@@ -75,13 +86,18 @@ def draw_grid():
             y = start_y + i * grid_cell_height + (grid_cell_height - picture_size[1]) // 2
             pygame.draw.rect(screen, BLUE, (x, y, picture_size[0], picture_size[1]), 2)
 
-
+#draw_background()
+screen.fill(WHITE)
 running = True
 while running:
-    #draw_background()
+
+
+
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1 and not card_played:
@@ -100,20 +116,19 @@ while running:
                     drag_offset = (event.pos[0] - dragging_image.get_rect().left,
                                    event.pos[1] - dragging_image.get_rect(). top)
 
-
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1 and dragging_image is not None:
                 if event.pos[0] < screen_width / 2:
                     side = 'left'
                     player_hand = left_dropdown_images
+                    max_dropdown_items_left -= 1
+                    left_dropdown_images.remove(dragging_image)
                 else:
                     side = 'right'
                     player_hand = right_dropdown_images
-
-                if side == 'left':
-                    max_dropdown_items_left -= 1
-                elif side == 'right':
                     max_dropdown_items_right -= 1
+                    right_dropdown_images.remove(dragging_image)
+
 
                 grid_start_x = (screen_width - (grid_size[1] * grid_cell_width)) // 2
                 grid_start_y = (screen_height - (grid_size[0] * grid_cell_height)) // 2
@@ -124,13 +139,12 @@ while running:
                                                 grid_start_y + i * grid_cell_height,
                                                 grid_cell_width, grid_cell_height)
 
-                        if cell_rect.collidepoint(event.pos):
+                        if cell_rect.collidepoint(event.pos) and card_at_position[i][j] is None:
                             cell_center = cell_rect.center
                             image_rect = dragging_image.get_rect(center=cell_center)
                             screen.blit(dragging_image, image_rect)
 
-                            # removes card from hand when played
-                            player_hand.remove(dragging_image)
+                            card_at_position[i][j] = dragging_image
 
                             card_played = True
 
@@ -144,11 +158,16 @@ while running:
                             dragging_image = None
                             card_played = False
                             break
+                draw_background()
 
         elif event.type == pygame.MOUSEMOTION:
             if dragging_image is not None:
                 dragging_image_rect = dragging_image.get_rect()
                 dragging_image_rect.topleft = (event.pos[0] - drag_offset[0], event.pos[1] - drag_offset[1])
+
+
+    draw_grid()
+    pygame.display.flip()
 
     for i, card in enumerate(left_dropdown_images[:max_dropdown_items_left]):
         img_rect = card.get_rect(topleft=(0 + 10, i * dropdown_item_height + 20 - scroll_pos))
@@ -163,18 +182,9 @@ while running:
         right_card_image = players_hand(430, right_dropdown_images, max_dropdown_items_right, side='right')
 
 
-
-    # This line of code hides the cards behind the grid
-    #draw_grid()
-
-
-
-
-
-    # This line of code is causing img clipping
-    #if left_card_image is not None:
-        #screen.blit(left_card_image, pygame.mouse.get_pos())
-
+    if not card_played:
+        left_card_image = players_hand(0, left_dropdown_images, max_dropdown_items_left, side='left')
+        right_card_image = players_hand(430, right_dropdown_images, max_dropdown_items_right, side='right')
     pygame.display.flip()
 
 pygame.quit()
