@@ -4,8 +4,6 @@ import os
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-# Todo Save the output into a notepad as soon as you decide the format
-
 
 def split_image(image):
     # This function will split an image into thirds and return the 3 sections
@@ -59,8 +57,9 @@ with open(output_file_path, 'w') as output_file:
         counter += 1
 
         card_name = os.path.splitext(image_name)[0]
-        output_line = f"{card_name}, {' '.join(extracted_numbers)}\n"
+        output_line = f"{card_name} = Card({', '.join(extracted_numbers)})\n"
         output_file.write(output_line)
+        print(output_line)
 
 
         # Calculate accuracy

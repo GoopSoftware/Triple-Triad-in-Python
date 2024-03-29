@@ -28,16 +28,18 @@ def find_matching_image(input_image, folder_path):
     return matching_image
 
 
-counter = 0
-image_folder_path = 'downloaded_images'
 
-for image_name in os.listdir(image_folder_path):
-    input_image_path = os.path.join(image_folder_path, image_name)
-    counter += 1
+### This code just iterates through the folder to ensure 100% accuracy
+#counter = 0
+#image_folder_path = 'downloaded_images'
 
-    matching_image_path = find_matching_image(input_image_path, image_folder_path)
+#for image_name in os.listdir(image_folder_path):
+    #input_image_path = os.path.join(image_folder_path, image_name)
+    #counter += 1
 
-    if matching_image_path:
-        print(f"{counter} Image Found:", matching_image_path)
-    else:
-        print("No Image Found")
+    #matching_image_path = find_matching_image(input_image_path, image_folder_path)
+
+    #if matching_image_path:
+        #print(f"{counter} Image Found:", matching_image_path)
+    #else:
+        #print("No Image Found")

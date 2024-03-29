@@ -1,12 +1,12 @@
 class Card:
-    def __init__(self, top, right, bottom, left):
+    def __init__(self, top, left, right, bottom):
         self.top = top
+        self.left = left
         self.right = right
         self.bottom = bottom
-        self.left = left
 
     def __repr__(self):
-        return f"Card({self.top}, {self.right}, {self.bottom}, {self.left})"
+        return f"Card({self.top} {self.right} {self.bottom} {self.left})"
 
     def can_take(self, other_card):
         if self.top == other_card.bottom or \
