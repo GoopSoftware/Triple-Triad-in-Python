@@ -31,7 +31,7 @@ def find_matching_image(input_image, folder_path):
 
 ### This code just iterates through the folder to ensure 100% accuracy
 #counter = 0
-#image_folder_path = 'downloaded_images'
+image_folder_path = 'downloaded_images'
 
 #for image_name in os.listdir(image_folder_path):
     #input_image_path = os.path.join(image_folder_path, image_name)

@@ -24,3 +24,11 @@ class Card:
         if self.left > other_card.right:
             return True
         return False
+    def take_card(self, other_card):
+        if self.cantake(other_card):
+            print("taking card")
+            return True
+
+        else:
+            print("Cannot take card")
+            return False

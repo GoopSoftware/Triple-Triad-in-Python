@@ -2,6 +2,8 @@ import random
 import pygame
 import os
 import sys
+import cv2
+from skimage.metrics import structural_similarity as ssim
 
 screen_width, screen_height = 540, 480
 screen = pygame.display.set_mode((screen_width, screen_height))
@@ -78,3 +80,26 @@ def draw_grid():
             x = start_x + j * grid_cell_width + (grid_cell_width - picture_size[0]) // 2
             y = start_y + i * grid_cell_height + (grid_cell_height - picture_size[1]) // 2
             pygame.draw.rect(screen, BLUE, (x, y, picture_size[0], picture_size[1]), 2)
+
+
+def find_matching_image(input_image, folder_path):
+    max_similarity = 0
+    matching_image = None
+    # Checks each file in the folder
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.png'):
+            image_path = os.path.join(folder_path, filename)
+            similarity, _ = compare_images(input_image, image_path)
+            if similarity > max_similarity:
+                max_similarity = similarity
+                matching_image = image_path
+    return matching_image
+
+def compare_images(image1, image2):
+    img1 = cv2.imread(image1, cv2.IMREAD_GRAYSCALE)
+    img2 = cv2.imread(image2, cv2.IMREAD_GRAYSCALE)
+
+    win_size = 5
+    # Detect similarity
+    similarity = ssim(img1, img2, win_size=win_size, full=True)
+    return similarity

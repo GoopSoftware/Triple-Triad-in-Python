@@ -46,7 +46,7 @@ dragging_image = None
 drag_offset = (0, 0)
 
 card_at_position = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
-
+image_folder_path = 'downloaded_images'
 
 
 #draw_background()
