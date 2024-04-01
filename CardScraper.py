@@ -26,8 +26,6 @@ urls = [
     "https://strategywiki.org/wiki/Final_Fantasy_VIII/Character_Cards"
     ]
 
-
-
 for url in urls:
 
     response = rq.get(url)

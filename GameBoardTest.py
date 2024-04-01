@@ -3,8 +3,12 @@ import sys
 import os
 import random
 from CardClass import Card
-from Functions import players_hand, draw_grid, draw_background
+from Functions import (players_hand, draw_grid, draw_background, find_matching_image,
+                       compare_images, read_card_data_from_txt)
 
+
+# todo: currently passing a string of numbers instead of integers in the mouseup section. Change to integers
+# todo: and apply to the card class. Then save the card class on the grid for later information
 
 pygame.init()
 
@@ -22,10 +26,19 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 
+
+# All file paths for program
 image_folder = "downloaded_images"
+image_paths = [os.path.join(image_folder, img) for img in os.listdir(image_folder) if
+                                       img.endswith('png')]
 images = [pygame.image.load(os.path.join(image_folder, img)).convert_alpha()
           for img in os.listdir(image_folder)]
+
+
+
 num_images = len(images)
+
+
 
 # The players hand
 left_dropdown_images = images[:]
@@ -46,7 +59,7 @@ dragging_image = None
 drag_offset = (0, 0)
 
 card_at_position = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
-image_folder_path = 'downloaded_images'
+
 
 
 #draw_background()
@@ -65,8 +78,10 @@ while running:
                 if dragging_image_left is not None:
                     if len(left_dropdown_images) > 1:
                         dragging_image = dragging_image_left
-                        drag_offset = (event.pos[0] - dragging_image.get_rect().left,
-                                       event.pos[1] - dragging_image.get_rect(). top)
+
+                        # This code handles logic of dragging card which is broken
+                        #drag_offset = (event.pos[0] - dragging_image.get_rect().left,
+                                       #event.pos[1] - dragging_image.get_rect(). top)
                     else:
                         dragging_image_left = None
 
@@ -75,13 +90,38 @@ while running:
                 if dragging_image_right is not None:
                     if len(left_dropdown_images) > 1:
                         dragging_image = dragging_image_right
-                        drag_offset = (event.pos[0] - dragging_image.get_rect().left,
-                                       event.pos[1] - dragging_image.get_rect(). top)
+
+                        # This code handles logic of dragging card which is broken
+                        #drag_offset = (event.pos[0] - dragging_image.get_rect().left,
+                                       #event.pos[1] - dragging_image.get_rect(). top)
                     else:
                         dragging_image_right = None
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1 and dragging_image is not None:
+                if dragging_image is not None:
+                    # Detecting the card numbers and outputting a Card class
+                    selected_card_path = find_matching_image(dragging_image, image_folder)
+
+                    filename = os.path.basename(selected_card_path)
+                    filename = filename.replace("downloaded_images\\", "").replace('.png', "")
+
+                    txt_file_path = "CardListValue.txt"
+                    card_data = read_card_data_from_txt(filename, txt_file_path)
+
+                    if card_data is not None:
+                        # Extract card numbers
+                        card_numbers = card_data
+                        print("Card Numbers", card_numbers)
+
+                        # Applying card numbers to card class
+                        card_object = Card(*card_numbers)
+                        print("Card Object:", card_object)
+                        print(type(card_object))
+                    else:
+                        print("Error Card data not found for filename:", filename)
+                        print(card_data)
+
                 if event.pos[0] < screen_width / 2:
                     side = 'left'
                     player_hand = left_dropdown_images

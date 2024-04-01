@@ -1,4 +1,6 @@
 import random
+import tempfile
+from CardClass import Card
 import pygame
 import os
 import sys
@@ -82,17 +84,24 @@ def draw_grid():
             pygame.draw.rect(screen, BLUE, (x, y, picture_size[0], picture_size[1]), 2)
 
 
-def find_matching_image(input_image, folder_path):
+def find_matching_image(dragging_image, folder_path):
     max_similarity = 0
     matching_image = None
+
+    program_dir = os.path.dirname(os.path.abspath(__file__))
+
+    temp_file_path = os.path.join(program_dir, "Temp_dragging_image.png")
+
+    pygame.image.save(dragging_image, temp_file_path)
     # Checks each file in the folder
     for filename in os.listdir(folder_path):
         if filename.endswith('.png'):
             image_path = os.path.join(folder_path, filename)
-            similarity, _ = compare_images(input_image, image_path)
+            similarity, _ = compare_images(temp_file_path, image_path)
             if similarity > max_similarity:
                 max_similarity = similarity
                 matching_image = image_path
+    os.remove(temp_file_path)
     return matching_image
 
 def compare_images(image1, image2):
@@ -103,3 +112,28 @@ def compare_images(image1, image2):
     # Detect similarity
     similarity = ssim(img1, img2, win_size=win_size, full=True)
     return similarity
+
+
+def read_card_data_from_txt(filename, txt_file_path):
+    with open(txt_file_path, 'r') as file:
+        for line in file:
+            if line.startswith(filename):
+                variable_name, card_data = line.split('=')
+
+                variable_name = variable_name.strip()
+
+                card_data = card_data.strip()
+
+                card_data = card_data.replace('(', '').replace(')', '').split(',')
+                card_data = [item.strip() for item in card_data]
+                card_number = card_data[0].replace('Card', '')
+                if card_number == 'A':
+                    card_number = 10
+                else:
+                    card_number = int(card_number)
+
+                card_data = (card_number,) + tuple(int(item) if item.isdigit() else item for item in card_data[1:])
+                print("Extracted card data:", card_data)
+                return card_data
+    print("No matching line found for filename:", filename)
+    return None
