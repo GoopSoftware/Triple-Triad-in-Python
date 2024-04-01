@@ -52,6 +52,20 @@ dragging_image = None
 drag_offset = (0, 0)
 card_at_position = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
 
+
+def rearrange_numbers(card_object, direction):
+
+
+def grid_to_index(row, col):
+    return row * grid_size[1] + col
+
+
+def index_to_grid(index):
+    row = index // grid_size[1]
+    col = index % grid_size[1]
+    return row, col
+
+
 screen.fill(WHITE)
 pygame.display.flip()
 running = True
@@ -105,16 +119,12 @@ while running:
                     if card_data is not None:
                         # Extract card numbers
                         card_numbers = card_data
-                        print("Card Numbers", card_numbers)
 
                         # Applying card numbers to card class
                         card_object = Card(*card_numbers)
-                        print("Card Object:", card_object)
-                        print(type(card_object))
+                        #print("Card Object:", card_object)
                     else:
                         print("Error Card data not found for filename:", filename)
-                        print(card_data)
-
 
                 if event.pos[0] < screen_width / 2:
                     side = 'left'
@@ -137,12 +147,39 @@ while running:
                                                 grid_start_y + i * grid_cell_height,
                                                 grid_cell_width, grid_cell_height)
 
+
                         if cell_rect.collidepoint(event.pos) and card_at_position[i][j] is None:
+                            current_index = grid_to_index(i, j)
+                            print("Card played at grid cell:", i+1, j+1)
+                            adjacent_indices = [
+                                grid_to_index(i-1, j),  # Above
+                                grid_to_index(i, j - 1),  # Left
+                                grid_to_index(i, j + 1),  # Right
+                                grid_to_index(i+1, j),  # Below
+                            ]
+                            for adj_index in adjacent_indices:
+                                adj_row, adj_col = index_to_grid(adj_index)
+                                if 0 <= adj_row < grid_size[0] and 0 <= adj_col < grid_size[1]:
+                                    adjacent_card = card_at_position[adj_row][adj_col]
+                                    if adjacent_card is not None:
+                                        if card_object.can_take(adjacent_card):
+                                            if adj_index == grid_to_index(i-1, j):
+                                                print("Taking card above")
+                                            elif adj_index == grid_to_index(i+1, j):
+                                                print("Taking card below")
+                                            elif adj_index == grid_to_index(i, j-1):
+                                                print("Taking left card")
+                                            elif adj_index == grid_to_index(i,j+1):
+                                                print("Taking right card")
+                                            print("current card:", card_object)
+                                            print("adjacent card:", adjacent_card)
+                                    else:
+                                        print("cannot take card")
                             cell_center = cell_rect.center
                             image_rect = dragging_image.get_rect(center=cell_center)
                             screen.blit(dragging_image, image_rect)
 
-                            card_at_position[i][j] = dragging_image
+                            card_at_position[i][j] = card_object
 
                             card_played = True
 

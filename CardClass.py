@@ -8,6 +8,13 @@ class Card:
     def __repr__(self):
         return f"Card({self.top} {self.right} {self.bottom} {self.left})"
 
+
+    def update_numbees(self, top, left, right, bottom):
+        self.top = top
+        self.left = left
+        self.right = right
+        self.bottom = bottom
+
     def can_take(self, other_card):
         if self.top == other_card.bottom or \
                 self.right == other_card.left or \
@@ -26,9 +33,9 @@ class Card:
         return False
     def take_card(self, other_card):
         if self.cantake(other_card):
-            print("taking card")
+            #print("taking card")
             return True
 
         else:
-            print("Cannot take card")
+            #print("Cannot take card")
             return False
