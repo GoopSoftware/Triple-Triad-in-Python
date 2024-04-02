@@ -5,9 +5,9 @@ import random
 from CardClass import Card
 from Functions import (players_hand, draw_grid, draw_background, find_matching_image,
                        compare_images, read_card_data_from_txt)
+from GameClass import Game
 
 
-# todo: store the card class on the grid for later information
 
 pygame.init()
 # standardizing the pygame window sizes as well as colors
@@ -53,8 +53,9 @@ drag_offset = (0, 0)
 card_at_position = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
 
 
-def rearrange_numbers(card_object, direction):
-
+def rearrange_numbers(n1, n2, n3, n4):
+    n1, n2, n3, n4 = n1, n4, n2, n3
+    return n1, n2, n3, n4
 
 def grid_to_index(row, col):
     return row * grid_size[1] + col
@@ -119,6 +120,7 @@ while running:
                     if card_data is not None:
                         # Extract card numbers
                         card_numbers = card_data
+                        #print("card numbers", card_numbers)
 
                         # Applying card numbers to card class
                         card_object = Card(*card_numbers)
@@ -159,22 +161,18 @@ while running:
                             ]
                             for adj_index in adjacent_indices:
                                 adj_row, adj_col = index_to_grid(adj_index)
+                                print("Adjacent index:", adj_index, "Row", adj_row, "Column", adj_col)
                                 if 0 <= adj_row < grid_size[0] and 0 <= adj_col < grid_size[1]:
                                     adjacent_card = card_at_position[adj_row][adj_col]
+                                    print("Adj Card:", adjacent_card)
                                     if adjacent_card is not None:
+
                                         if card_object.can_take(adjacent_card):
-                                            if adj_index == grid_to_index(i-1, j):
-                                                print("Taking card above")
-                                            elif adj_index == grid_to_index(i+1, j):
-                                                print("Taking card below")
-                                            elif adj_index == grid_to_index(i, j-1):
-                                                print("Taking left card")
-                                            elif adj_index == grid_to_index(i,j+1):
-                                                print("Taking right card")
-                                            print("current card:", card_object)
-                                            print("adjacent card:", adjacent_card)
+                                            print("Taking adjacent card")
+                                        else:
+                                            print("Cannot take adjacent card")
                                     else:
-                                        print("cannot take card")
+                                        print("No card at adjacent position")
                             cell_center = cell_rect.center
                             image_rect = dragging_image.get_rect(center=cell_center)
                             screen.blit(dragging_image, image_rect)

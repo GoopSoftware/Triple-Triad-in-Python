@@ -58,7 +58,7 @@ def players_hand(x_pos, images, max_items, side):
 
 def draw_background():
     side_width = (screen_width - 300) // 2
-    print("Side Width:", side_width)
+    #print("Side Width:", side_width)
     if len(left_dropdown_images) > 0:
         pygame.draw.rect(screen, WHITE, (0, 0, side_width, screen_height))
     if len(right_dropdown_images) > 0:
@@ -126,14 +126,10 @@ def read_card_data_from_txt(filename, txt_file_path):
 
                 card_data = card_data.replace('(', '').replace(')', '').split(',')
                 card_data = [item.strip() for item in card_data]
-                card_number = card_data[0].replace('Card', '')
-                if card_number == 'A':
-                    card_number = 10
-                else:
-                    card_number = int(card_number)
+                card_number = int(card_data[0].replace('Card', ''))
 
                 card_data = (card_number,) + tuple(int(item) if item.isdigit() else item for item in card_data[1:])
-                print("Extracted card data:", card_data)
+                #print("Extracted card data:", card_data)
                 return card_data
-    print("No matching line found for filename:", filename)
+    #print("No matching line found for filename:", filename)
     return None
