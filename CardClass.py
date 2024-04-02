@@ -16,7 +16,6 @@ class Card:
         self.bottom = bottom
 
     def can_take(self, other_card):
-        num_cards_taken = 0
         if other_card.top == 10 or other_card.right == 10 or other_card.bottom == 10 or other_card.left == 10:
             return False
 
@@ -27,12 +26,16 @@ class Card:
             return False
 
         if self.top > other_card.bottom:
+            print(self.top, other_card.bottom)
             return True
         if self.right > other_card.left:
+            print(self.right, other_card.left)
             return True
         if self.bottom > other_card.top:
+            print(self.bottom, other_card.top)
             return True
         if self.left > other_card.right:
+            print(self.left, other_card.right)
             return True
         return False
 

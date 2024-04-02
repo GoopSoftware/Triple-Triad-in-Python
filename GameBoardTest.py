@@ -58,13 +58,34 @@ def rearrange_numbers(n1, n2, n3, n4):
     return n1, n2, n3, n4
 
 def grid_to_index(row, col):
+    row = max(0, min(row, grid_size[0] - 1))
+    col = max(0, min(col, grid_size[1] - 1))
     return row * grid_size[1] + col
 
 
 def index_to_grid(index):
     row = index // grid_size[1]
     col = index % grid_size[1]
+    row = max(0, min(row, grid_size[0] - 1))
+    col = max(0, min(col, grid_size[1] - 1))
     return row, col
+
+def print_grid_with_cards():
+    for i in range(grid_size[0]):
+        for j in range(grid_size[1]):
+            if card_at_position[i][j] is None:
+                print("   ", end="")  # Print empty space if no card
+            else:
+                card = card_at_position[i][j]
+                # Print card numbers or any other relevant information
+                print(f"{card}", end="")
+            print(" | ", end="")
+        print("\n" + "-" * (6 * grid_size[1] + 1))  # Horizontal line after each row
+
+
+left_player_turn = True
+cards_taken_left = 0
+cards_taken_right = 0
 
 
 screen.fill(WHITE)
@@ -79,31 +100,34 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # Handles the logic of when the mouse is pressed down for each players hand
             if event.button == 1 and not card_played:
-                dragging_image_left = players_hand(0, left_dropdown_images,
+                if left_player_turn:
+                    dragging_image_left = players_hand(0, left_dropdown_images,
                                                    max_dropdown_items_left, side='left')
-                if dragging_image_left is not None:
-                    if len(left_dropdown_images) > 0:
-                        # This helps play the card onto the grid
-                        dragging_image = dragging_image_left
+                    if dragging_image_left is not None:
+                        if len(left_dropdown_images) > 0:
+                            # This helps play the card onto the grid
+                            dragging_image = dragging_image_left
 
-                        # This code handles logic of dragging card which is broken
-                        #drag_offset = (event.pos[0] - dragging_image.get_rect().left,
-                                       #event.pos[1] - dragging_image.get_rect(). top)
-                    else:
-                        dragging_image_left = None
+                            # This code handles logic of dragging card which is broken
+                            #drag_offset = (event.pos[0] - dragging_image.get_rect().left,
+                                           #event.pos[1] - dragging_image.get_rect(). top)
+                        else:
+                            dragging_image_left = None
 
-                dragging_image_right = players_hand(430, right_dropdown_images,
-                                                    max_dropdown_items_right, side='right')
-                if dragging_image_right is not None:
-                    if len(right_dropdown_images) > 0:
-                        # This helps play the card onto the grid
-                        dragging_image = dragging_image_right
+                else:
+                    dragging_image_right = players_hand(430, right_dropdown_images,
+                                                        max_dropdown_items_right, side='right')
+                    if dragging_image_right is not None:
+                        if len(right_dropdown_images) > 0:
+                            # This helps play the card onto the grid
+                            dragging_image = dragging_image_right
 
-                        # This code handles logic of dragging card which is broken
-                        #drag_offset = (event.pos[0] - dragging_image.get_rect().left,
-                                       #event.pos[1] - dragging_image.get_rect(). top)
-                    else:
-                        dragging_image_right = None
+                            # This code handles logic of dragging card which is broken
+                            #drag_offset = (event.pos[0] - dragging_image.get_rect().left,
+                                           #event.pos[1] - dragging_image.get_rect(). top)
+                        else:
+                            dragging_image_right = None
+
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1 and dragging_image is not None:
@@ -128,16 +152,18 @@ while running:
                     else:
                         print("Error Card data not found for filename:", filename)
 
-                if event.pos[0] < screen_width / 2:
+                if left_player_turn:
                     side = 'left'
                     player_hand = left_dropdown_images
                     max_dropdown_items_left -= 1
                     left_dropdown_images.remove(dragging_image)
+                    left_player_turn = False
                 else:
                     side = 'right'
                     player_hand = right_dropdown_images
                     max_dropdown_items_right -= 1
                     right_dropdown_images.remove(dragging_image)
+                    left_player_turn = True
 
 
                 grid_start_x = (screen_width - (grid_size[1] * grid_cell_width)) // 2
@@ -152,34 +178,26 @@ while running:
 
                         if cell_rect.collidepoint(event.pos) and card_at_position[i][j] is None:
                             current_index = grid_to_index(i, j)
-                            print("Card played at grid cell:", i+1, j+1)
                             adjacent_indices = [
-                                grid_to_index(i-1, j),  # Above
+                                grid_to_index(i - 1, j),  # Above
                                 grid_to_index(i, j - 1),  # Left
                                 grid_to_index(i, j + 1),  # Right
-                                grid_to_index(i+1, j),  # Below
+                                grid_to_index(i + 1, j),  # Below
                             ]
-                            for adj_index in adjacent_indices:
-                                adj_row, adj_col = index_to_grid(adj_index)
-                                print("Adjacent index:", adj_index, "Row", adj_row, "Column", adj_col)
-                                if 0 <= adj_row < grid_size[0] and 0 <= adj_col < grid_size[1]:
-                                    adjacent_card = card_at_position[adj_row][adj_col]
-                                    print("Adj Card:", adjacent_card)
-                                    if adjacent_card is not None:
 
-                                        if card_object.can_take(adjacent_card):
-                                            print("Taking adjacent card")
-                                        else:
-                                            print("Cannot take adjacent card")
-                                    else:
-                                        print("No card at adjacent position")
+                            for adj_index in adjacent_indices:
+                                pass
+
                             cell_center = cell_rect.center
                             image_rect = dragging_image.get_rect(center=cell_center)
                             screen.blit(dragging_image, image_rect)
 
                             card_at_position[i][j] = card_object
 
+
                             card_played = True
+
+                            print_grid_with_cards()
 
                             if dragging_image in left_dropdown_images:
                                 left_dropdown_images.remove(dragging_image)
