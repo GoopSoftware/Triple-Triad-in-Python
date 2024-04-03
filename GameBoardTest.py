@@ -54,6 +54,21 @@ drag_offset = (0, 0)
 card_at_position = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
 
 
+left_player_score = 0
+right_player_score = 0
+
+def take_card(row, col):
+    # This function handles the score system and whatever happens after a player takes a card
+    global left_player_score, right_player_score
+
+    if left_player_turn:
+        left_player_score += 1
+    else:
+        right_player_score += 1
+
+    print("Left Player Score:", left_player_score)
+    print("Right Player Score:", right_player_score)
+
 def rearrange_numbers(n1, n2, n3, n4):
     n1, n2, n3, n4 = n1, n4, n2, n3
     return n1, n2, n3, n4
@@ -178,14 +193,13 @@ while running:
                         if cell_rect.collidepoint(event.pos) and card_at_position[i][j] is None:
                             current_index = grid_to_index(i, j)
                             adjacent_indices = [
-                                grid_to_index(i - 1, j),  # Above
-                                grid_to_index(i, j - 1),  # Left
-                                grid_to_index(i, j + 1),  # Right
-                                grid_to_index(i + 1, j),  # Below
+                                (i - 1, j),  # Above
+                                (i, j - 1),  # Left
+                                (i, j + 1),  # Right
+                                (i + 1, j),  # Below
                             ]
 
-                            for index in adjacent_indices:
-                                adj_row, adj_col = index_to_grid(index)
+                            for adj_row, adj_col in adjacent_indices:
                                 if 0 <= adj_row < grid_size[0] and 0 <= adj_col < grid_size[1]:
                                     adjacent_card = card_at_position[adj_row][adj_col]
 
@@ -193,15 +207,19 @@ while running:
                                         if adj_row == i - 1:
                                             if card_object.can_take(adjacent_card, 'top'):
                                                 print("Can take card above:")
-                                        elif adj_row == i + 1:
+                                                take_card(adj_row, adj_col)
+                                        if adj_row == i + 1:
                                             if card_object.can_take(adjacent_card, 'bottom'):
                                                 print("Can take the card below:")
-                                        elif adj_row == j - 1:
+                                                take_card(adj_row, adj_col)
+                                        if adj_row == j - 1:
                                             if card_object.can_take(adjacent_card, 'left'):
                                                 print("Can take the card to the left:")
-                                        elif adj_row == j + 1:
+                                                take_card(adj_row, adj_col)
+                                        if adj_row == j + 1:
                                             if card_object.can_take(adjacent_card, 'right'):
                                                 print("Can take the card to the right:")
+                                                take_card(adj_row, adj_col)
                             cell_center = cell_rect.center
                             image_rect = dragging_image.get_rect(center=cell_center)
                             screen.blit(dragging_image, image_rect)
