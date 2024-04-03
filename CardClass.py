@@ -15,29 +15,27 @@ class Card:
         self.right = right
         self.bottom = bottom
 
-    def can_take(self, other_card):
-        if other_card.top == 10 or other_card.right == 10 or other_card.bottom == 10 or other_card.left == 10:
-            return False
+    def can_take(self, other_card, side):
+        if side == 'top':
+            if other_card.bottom == 10:
+                return False
+            return self.top > other_card.bottom
 
-        if self.top == other_card.bottom or \
-                self.right == other_card.left or \
-                self.bottom == other_card.top or \
-                self.left == other_card.right:
-            return False
+        elif side == 'right':
+            if other_card.left == 10:
+                return False
+            return self.right > other_card.left
 
-        if self.top > other_card.bottom:
-            print(self.top, other_card.bottom)
-            return True
-        if self.right > other_card.left:
-            print(self.right, other_card.left)
-            return True
-        if self.bottom > other_card.top:
-            print(self.bottom, other_card.top)
-            return True
-        if self.left > other_card.right:
-            print(self.left, other_card.right)
-            return True
-        return False
+        elif side == 'bottom':
+            if other_card.top == 10:
+                return False
+            return self.bottom > other_card.top
+
+        elif side == 'left':
+            if other_card.right == 10:
+                return False
+            return self.left > other_card.right
+
 
     def take_card(self, other_card):
         if self.can_take(other_card):

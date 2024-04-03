@@ -7,7 +7,8 @@ from Functions import (players_hand, draw_grid, draw_background, find_matching_i
                        compare_images, read_card_data_from_txt)
 from GameClass import Game
 
-
+# todo: When placing a card it is iterating through every single can_take and if top is great than bottom it
+# todo: will only do top and bottom it wont do anything else
 
 pygame.init()
 # standardizing the pygame window sizes as well as colors
@@ -98,14 +99,12 @@ while running:
             running = False
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            # Handles the logic of when the mouse is pressed down for each players hand
             if event.button == 1 and not card_played:
                 if left_player_turn:
                     dragging_image_left = players_hand(0, left_dropdown_images,
                                                    max_dropdown_items_left, side='left')
                     if dragging_image_left is not None:
                         if len(left_dropdown_images) > 0:
-                            # This helps play the card onto the grid
                             dragging_image = dragging_image_left
 
                             # This code handles logic of dragging card which is broken
@@ -185,9 +184,24 @@ while running:
                                 grid_to_index(i + 1, j),  # Below
                             ]
 
-                            for adj_index in adjacent_indices:
-                                pass
+                            for index in adjacent_indices:
+                                adj_row, adj_col = index_to_grid(index)
+                                if 0 <= adj_row < grid_size[0] and 0 <= adj_col < grid_size[1]:
+                                    adjacent_card = card_at_position[adj_row][adj_col]
 
+                                    if adjacent_card is not None:
+                                        if adj_row == i - 1:
+                                            if card_object.can_take(adjacent_card, 'top'):
+                                                print("Can take card above:")
+                                        elif adj_row == i + 1:
+                                            if card_object.can_take(adjacent_card, 'bottom'):
+                                                print("Can take the card below:")
+                                        elif adj_row == j - 1:
+                                            if card_object.can_take(adjacent_card, 'left'):
+                                                print("Can take the card to the left:")
+                                        elif adj_row == j + 1:
+                                            if card_object.can_take(adjacent_card, 'right'):
+                                                print("Can take the card to the right:")
                             cell_center = cell_rect.center
                             image_rect = dragging_image.get_rect(center=cell_center)
                             screen.blit(dragging_image, image_rect)
