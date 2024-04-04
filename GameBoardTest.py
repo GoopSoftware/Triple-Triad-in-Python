@@ -7,8 +7,9 @@ from Functions import (players_hand, draw_grid, draw_background, find_matching_i
                        compare_images, read_card_data_from_txt)
 from GameClass import Game
 
-# todo: When placing a card it is iterating through every single can_take and if top is great than bottom it
-# todo: will only do top and bottom it wont do anything else
+# todo: Add score system. Figure out how to handle score system through GameClass
+# todo: Assign cards to players so that you cant take your own card
+# todo:
 
 pygame.init()
 # standardizing the pygame window sizes as well as colors
@@ -54,20 +55,25 @@ drag_offset = (0, 0)
 card_at_position = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
 
 
-left_player_score = 0
-right_player_score = 0
+left_player_score = 5
+right_player_score = 5
+
 
 def take_card(row, col):
     # This function handles the score system and whatever happens after a player takes a card
     global left_player_score, right_player_score
 
     if left_player_turn:
-        left_player_score += 1
+        left_player_score -= 1
+        right_player_score +=1
     else:
-        right_player_score += 1
+        right_player_score -= 1
+        left_player_score += 1
+
 
     print("Left Player Score:", left_player_score)
     print("Right Player Score:", right_player_score)
+
 
 def rearrange_numbers(n1, n2, n3, n4):
     n1, n2, n3, n4 = n1, n4, n2, n3
@@ -102,6 +108,7 @@ def print_grid_with_cards():
 left_player_turn = True
 cards_taken_left = 0
 cards_taken_right = 0
+font = pygame.font.Font(None, 36)
 
 
 screen.fill(WHITE)
@@ -109,6 +116,11 @@ pygame.display.flip()
 running = True
 while running:
     draw_grid()
+    left_player_score_surface = font.render("{}".format(left_player_score), True, BLACK)
+    screen.blit(left_player_score_surface, (170, 25))
+    right_player_score_surface = font.render("{}".format(right_player_score), True, BLACK)
+    screen.blit(right_player_score_surface, (360, 25))
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -204,22 +216,27 @@ while running:
                                     adjacent_card = card_at_position[adj_row][adj_col]
 
                                     if adjacent_card is not None:
-                                        if adj_row == i - 1:
+                                        if adj_row == i - 1 and adj_col == j:
                                             if card_object.can_take(adjacent_card, 'top'):
                                                 print("Can take card above:")
                                                 take_card(adj_row, adj_col)
-                                        if adj_row == i + 1:
+
+                                        if adj_row == i + 1 and adj_col == j:
                                             if card_object.can_take(adjacent_card, 'bottom'):
                                                 print("Can take the card below:")
                                                 take_card(adj_row, adj_col)
-                                        if adj_row == j - 1:
+
+                                        if adj_row == i and adj_col == j - 1:
                                             if card_object.can_take(adjacent_card, 'left'):
                                                 print("Can take the card to the left:")
                                                 take_card(adj_row, adj_col)
-                                        if adj_row == j + 1:
+
+                                        if adj_row == i and adj_col == j + 1:
                                             if card_object.can_take(adjacent_card, 'right'):
                                                 print("Can take the card to the right:")
                                                 take_card(adj_row, adj_col)
+
+
                             cell_center = cell_rect.center
                             image_rect = dragging_image.get_rect(center=cell_center)
                             screen.blit(dragging_image, image_rect)
@@ -241,6 +258,7 @@ while running:
                             dragging_image = None
                             card_played = False
                             break
+
                 draw_background()
 
         #elif event.type == pygame.MOUSEMOTION:

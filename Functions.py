@@ -59,6 +59,7 @@ def players_hand(x_pos, images, max_items, side):
 def draw_background():
     side_width = (screen_width - 300) // 2
     #print("Side Width:", side_width)
+    pygame.draw.rect(screen, WHITE, (0, 0, screen_width, 50))
     if len(left_dropdown_images) > 0:
         pygame.draw.rect(screen, WHITE, (0, 0, side_width, screen_height))
     if len(right_dropdown_images) > 0:

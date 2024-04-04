@@ -21,17 +21,17 @@ class Card:
                 return False
             return self.top > other_card.bottom
 
-        elif side == 'right':
+        if side == 'right':
             if other_card.left == 10:
                 return False
             return self.right > other_card.left
 
-        elif side == 'bottom':
+        if side == 'bottom':
             if other_card.top == 10:
                 return False
             return self.bottom > other_card.top
 
-        elif side == 'left':
+        if side == 'left':
             if other_card.right == 10:
                 return False
             return self.left > other_card.right
