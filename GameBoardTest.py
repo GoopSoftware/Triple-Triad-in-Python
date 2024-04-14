@@ -5,11 +5,7 @@ import random
 from CardClass import Card
 from Functions import (players_hand, draw_grid, draw_background, find_matching_image,
                        compare_images, read_card_data_from_txt)
-from GameClass import Game
 
-# todo: Add score system. Figure out how to handle score system through GameClass
-# todo: Assign cards to players so that you cant take your own card
-# todo:
 
 pygame.init()
 # standardizing the pygame window sizes as well as colors
@@ -59,18 +55,44 @@ left_player_score = 5
 right_player_score = 5
 
 
+def check_win_condition():
+    #print("Checking win condition")
+    if max_dropdown_items_left == 0:
+        left_total_score = left_player_score
+        right_total_score = right_player_score
+
+        if left_total_score > right_total_score:
+            print("Player 1 (left) wins!")
+        elif left_total_score < right_total_score:
+            print("Player 2 (right) wins!")
+        else:
+            print("It was a tie!")
+        return True
+
+    return False
+
+
 def take_card(row, col):
     # This function handles the score system and whatever happens after a player takes a card
     global left_player_score, right_player_score
 
+    if card_at_position[row][col] is not None:
+        current_owner = card_at_position[row][col].owner
+    else:
+        print("Card owner doesn not exist")
+
+    if current_owner == side:
+        print("cannot take own card")
+        return
+
     if left_player_turn:
         left_player_score -= 1
         right_player_score +=1
+        card_at_position[row][col].owner = 'left'
     else:
         right_player_score -= 1
         left_player_score += 1
-
-
+        card_at_position[row][col].owner = 'right'
     print("Left Player Score:", left_player_score)
     print("Right Player Score:", right_player_score)
 
@@ -96,13 +118,14 @@ def print_grid_with_cards():
     for i in range(grid_size[0]):
         for j in range(grid_size[1]):
             if card_at_position[i][j] is None:
-                print("   ", end="")  # Print empty space if no card
+                pass
+                #print("   ", end="")  # Print empty space if no card
             else:
                 card = card_at_position[i][j]
                 # Print card numbers or any other relevant information
-                print(f"{card}", end="")
-            print(" | ", end="")
-        print("\n" + "-" * (6 * grid_size[1] + 1))  # Horizontal line after each row
+                #print(f"{card}", end="")
+            #print(" | ", end="")
+        #print("\n" + "-" * (6 * grid_size[1] + 1))  # Horizontal line after each row
 
 
 left_player_turn = True
@@ -203,6 +226,8 @@ while running:
 
 
                         if cell_rect.collidepoint(event.pos) and card_at_position[i][j] is None:
+                            card_object.owner = side
+                            card_at_position[i][j] = card_object
                             current_index = grid_to_index(i, j)
                             adjacent_indices = [
                                 (i - 1, j),  # Above
@@ -218,24 +243,30 @@ while running:
                                     if adjacent_card is not None:
                                         if adj_row == i - 1 and adj_col == j:
                                             if card_object.can_take(adjacent_card, 'top'):
-                                                print("Can take card above:")
+                                                #print("Can take card above:")
                                                 take_card(adj_row, adj_col)
+                                                card_object.owner = side
 
                                         if adj_row == i + 1 and adj_col == j:
                                             if card_object.can_take(adjacent_card, 'bottom'):
-                                                print("Can take the card below:")
+                                                #print("Can take the card below:")
                                                 take_card(adj_row, adj_col)
+                                                card_object.owner = side
 
                                         if adj_row == i and adj_col == j - 1:
                                             if card_object.can_take(adjacent_card, 'left'):
-                                                print("Can take the card to the left:")
+                                                #print("Can take the card to the left:")
                                                 take_card(adj_row, adj_col)
+                                                card_object.owner = side
 
                                         if adj_row == i and adj_col == j + 1:
                                             if card_object.can_take(adjacent_card, 'right'):
-                                                print("Can take the card to the right:")
+                                                #print("Can take the card to the right:")
                                                 take_card(adj_row, adj_col)
+                                                card_object.owner = side
 
+                            if check_win_condition():
+                                running = False
 
                             cell_center = cell_rect.center
                             image_rect = dragging_image.get_rect(center=cell_center)
@@ -266,12 +297,14 @@ while running:
                 #dragging_image_rect = dragging_image.get_rect()
                 #dragging_image_rect.topleft = (event.pos[0] - drag_offset[0], event.pos[1] - drag_offset[1])
 
+
     if not card_played:
         if len(left_dropdown_images) > 0:
             left_card_image = players_hand(0, left_dropdown_images, max_dropdown_items_left, side='left')
         if len(right_dropdown_images) > 0:
             right_card_image = players_hand(430, right_dropdown_images, max_dropdown_items_right, side='right')
     pygame.display.flip()
+
 
 pygame.quit()
 sys.exit()

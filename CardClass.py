@@ -1,9 +1,10 @@
 class Card:
-    def __init__(self, top, left, right, bottom):
+    def __init__(self, top, left, right, bottom, owner=None):
         self.top = top
         self.left = left
         self.right = right
         self.bottom = bottom
+        self.owner = owner
 
     def __repr__(self):
         return f"Card({self.top} {self.left} {self.right} {self.bottom})"
